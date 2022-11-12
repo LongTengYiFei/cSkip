@@ -10,6 +10,20 @@
 using namespace std;
 
 float p = 0.5;
+// ----- ----- ----- ----- ----- ----- ----- ----- -----
+template<typename V>
+V returnNullValue(){
+    if(std::is_same<V, int>::value)
+        return 0;
+    if(std::is_same<V, float>::value)
+        return 0;
+    if(std::is_same<V, string>::value)
+        return "";
+}
+
+float pRandom(){
+    return rand()%100/(double)101;
+}
 
 // ----- ----- ----- ----- ----- ----- ----- ----- -----
 
@@ -36,6 +50,11 @@ Node<K, V>::Node(K k, V v, int level){
         forward_vec[i] = nullptr;
 }
 
+template<typename K, typename V>
+Node<K, V>::~Node(){
+    
+}
+
 
 // ----- ----- ----- ----- ----- ----- ----- ----- -----
 
@@ -48,7 +67,6 @@ class SkipList{
         void Insert(K, V);
         void Delete(K);
         
-        int size();
         void display_SkipList();
         int randomLevel();
 
@@ -73,12 +91,13 @@ template<typename K, typename V>
 V SkipList<K, V>::Search(K search_key){
     Node<K, V>* x = this->header;
     for(int i=this->level; i>=1; i--){
-        while(x->forward_vec[i]->key < search_key){
+        while(x->forward_vec[i]!=nullptr &&
+                x->forward_vec[i]->key < search_key){
             x = x->forward_vec[i];
         }
     }
     x = x->forward_vec[1];
-    if(x->key == search_key)
+    if(x!=nullptr && x->key == search_key)
         return x->value;
     return returnNullValue<V>();
 }
@@ -90,14 +109,15 @@ void SkipList<K, V>::Insert(K search_key, V new_value){
 
     Node<K, V>* x = this->header;
     for(int i=this->level; i>=1; i--){
-        while(x->forward_vec[i]->key < search_key){
+        while(x->forward_vec[i]!=nullptr && 
+                x->forward_vec[i]->key < search_key){
             x = x->forward_vec[i];
         }
         update[i] = x;
     }
     x = x->forward_vec[1];
 
-    if(x->key == search_key)
+    if(x!=nullptr && x->key == search_key)
         x->value = new_value;
     else{
         this->size++;
@@ -106,7 +126,7 @@ void SkipList<K, V>::Insert(K search_key, V new_value){
         if(new_level > this->level){
             for(int i=this->level+1; i<=new_level; i++)
                 update[i] = this->header;
-            this->level = new-level;
+            this->level = new_level;
         }
 
         x = new Node<K, V>(search_key, new_value, new_level);
@@ -124,14 +144,15 @@ void SkipList<K, V>::Delete(K search_key){
 
     Node<K, V>* x = this->header;
     for(int i=this->level; i>=1; i--){
-        while(x->forward_vec[i]->key < search_key){
+        while(x->forward_vec[i]!=nullptr && 
+                x->forward_vec[i]->key < search_key){
             x = x->forward_vec[i];
         }
         update[i] = x;
     }
     x = x->forward_vec[1];
 
-    if(x->key == search_key){
+    if(x!=nullptr && x->key == search_key){
         this->size--;
 
         for(int i=1; i<=this->level; i++){
@@ -153,21 +174,8 @@ int SkipList<K, V>::randomLevel(){
     int new_level = 1;
     while(pRandom() < p)
         new_level ++;
-    return min(new_level, this->max_level)
+    return min(new_level, this->max_level);
 }
 
-// ----- ----- ----- ----- ----- ----- ----- ----- -----
-template<typename V>
-V returnNullValue(){
-    if(std::is_same<V, int>::value)
-        return 0;
-    if(std::is_same<V, float>::value)
-        return 0;
-    if(std::is_same<V, string>::value)
-        return "";
-}
 
-float pRandom(){
-    return rand()%100/(double)101;
-}
 
